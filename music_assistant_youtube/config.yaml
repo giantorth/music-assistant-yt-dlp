@@ -1,4 +1,4 @@
-name: Music Assistant Server (YouTube)
+name: Music Assistant Server
 version: 2.7.11-patch.50b94ab
 slug: music_assistant_youtube
 description: Music Assistant Server with YouTube provider (yt-dlp) injected
