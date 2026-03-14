@@ -66,8 +66,12 @@ jobs:
           git commit -m "chore: bump upstream MA to ${UPSTREAM_VERSION}"
           git push
 
-      - name: Trigger container build
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
         run: |
-          gh workflow run build.yaml
+          gh release create "$UPSTREAM_VERSION" \
+            --title "Music Assistant $UPSTREAM_VERSION" \
+            --notes "Automated rebuild tracking upstream Music Assistant server release \`$UPSTREAM_VERSION\`." \
+            --latest
