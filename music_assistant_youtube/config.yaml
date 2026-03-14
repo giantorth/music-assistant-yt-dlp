@@ -1,5 +1,5 @@
 name: Music Assistant Server (YouTube)
-version: 1.0.0
+version: latest-patch.47cbcf8
 slug: music_assistant_youtube
 description: Music Assistant Server with YouTube provider (yt-dlp) injected
 url: https://github.com/giantorth/music-assistant-yt-dlp
