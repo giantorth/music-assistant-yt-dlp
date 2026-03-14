@@ -12,13 +12,59 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      base_tag: ${{ steps.version.outputs.base_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE=""
+          if [ -f .upstream-version ]; then
+            BASE=$(cat .upstream-version)
+          fi
+          # Never use "latest" — resolve to actual upstream release
+          if [ -z "$BASE" ] || [ "$BASE" = "latest" ]; then
+            BASE=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
+          fi
+          echo "base_tag=$BASE" >> "$GITHUB_OUTPUT"
+
+          # For push events (provider changes), append a patch suffix
+          # For release events (upstream bumps), use the upstream version as-is
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${BASE}-patch.$(git rev-parse --short HEAD)"
+          else
+            VERSION="$BASE"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update config.yaml version
+        if: github.event_name == 'push'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          sed -i "s/^version:.*/version: ${VERSION}/" music_assistant_youtube/config.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add music_assistant_youtube/config.yaml
+          git commit -m "chore: bump version to ${VERSION}" || true
+          git push || true
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
       packages: write
     strategy:
       matrix:
@@ -27,21 +73,8 @@ jobs:
           - linux/aarch64
     steps:
       - uses: actions/checkout@v4
-
-      - name: Determine upstream version
-        id: version
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          VERSION=""
-          if [ -f .upstream-version ]; then
-            VERSION=$(cat .upstream-version)
-          fi
-          # Never use "latest" as a version tag — resolve it to an actual release
-          if [ -z "$VERSION" ] || [ "$VERSION" = "latest" ]; then
-            VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
-          fi
-          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+        with:
+          ref: ${{ github.ref }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -71,15 +104,15 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           build-args: |
-            BUILD_FROM=ghcr.io/music-assistant/server:${{ steps.version.outputs.tag }}
+            BUILD_FROM=ghcr.io/music-assistant/server:${{ needs.prepare.outputs.base_tag }}
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:${{ steps.version.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:${{ needs.prepare.outputs.version }}
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   release:
-    needs: build
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     permissions:
@@ -87,23 +120,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create release for provider changes
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          BASE_TAG: ${{ needs.prepare.outputs.base_tag }}
         run: |
-          VERSION=$(cat .upstream-version)
-          # Append a patch suffix based on short SHA to distinguish provider-only rebuilds
-          TAG="${VERSION}-patch.$(git rev-parse --short HEAD)"
-
-          # Update config.yaml to match the new tag
-          sed -i "s/^version:.*/version: ${TAG}/" music_assistant_youtube/config.yaml
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add music_assistant_youtube/config.yaml
-          git commit -m "chore: bump version to ${TAG}" || true
-          git push || true
-
-          gh release create "$TAG" \
-            --title "Provider update $TAG" \
-            --notes "Provider code change rebuild based on upstream Music Assistant \`$VERSION\`." \
+          gh release create "$VERSION" \
+            --title "Provider update $VERSION" \
+            --notes "Provider code change rebuild based on upstream Music Assistant \`$BASE_TAG\`." \
             --latest
