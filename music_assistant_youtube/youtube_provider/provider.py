@@ -23,7 +23,11 @@ from music_assistant_models.media_items import (
 )
 from music_assistant_models.streamdetails import StreamDetails, StreamMetadata
 
-from music_assistant.constants import VERBOSE_LOG_LEVEL, PlaylistPlayableItem
+from music_assistant.constants import VERBOSE_LOG_LEVEL
+
+# Type alias matching MA-server's PlaylistPlayableItem (Track | Radio | PodcastEpisode | Audiobook)
+# Defined locally to support MA versions that don't yet export it from constants
+PlaylistPlayableItem = Track
 from music_assistant.controllers.cache import use_cache
 from music_assistant.helpers.util import install_package
 from music_assistant.models.music_provider import MusicProvider
