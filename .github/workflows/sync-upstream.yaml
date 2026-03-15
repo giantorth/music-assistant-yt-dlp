@@ -12,6 +12,7 @@ jobs:
     outputs:
       new_release: ${{ steps.check.outputs.new_release }}
       upstream_version: ${{ steps.check.outputs.upstream_version }}
+      upstream_notes: ${{ steps.check.outputs.upstream_notes }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,9 +21,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Get the latest release tag from upstream
+          # Get the latest release tag and notes from upstream
           UPSTREAM_VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
           echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Capture upstream release notes (use delimiter for multiline)
+          EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "upstream_notes<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
+          gh api repos/music-assistant/server/releases/latest --jq '.body' >> "$GITHUB_OUTPUT"
+          echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
 
           # Read the version we last built against
           CURRENT_VERSION=""
@@ -73,9 +80,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
+          UPSTREAM_NOTES: ${{ needs.check-upstream.outputs.upstream_notes }}
         run: |
+          NOTES="Automated rebuild tracking upstream Music Assistant server release \`$UPSTREAM_VERSION\`.
+
+          ## Upstream Release Notes
+
+          $UPSTREAM_NOTES"
+
           gh release create "$UPSTREAM_VERSION" \
             --title "Music Assistant $UPSTREAM_VERSION" \
-            --notes "Automated rebuild tracking upstream Music Assistant server release \`$UPSTREAM_VERSION\`." \
-            --generate-notes \
+            --notes "$NOTES" \
             --latest
