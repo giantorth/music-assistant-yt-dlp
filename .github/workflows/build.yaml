@@ -9,6 +9,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      upstream_version:
+        description: "Upstream version that triggered this build"
+        required: false
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -21,6 +26,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       base_tag: ${{ steps.version.outputs.base_tag }}
+      commit_msg: ${{ steps.version.outputs.commit_msg }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,20 +49,36 @@ jobs:
           # For release events (upstream bumps), use the upstream version as-is
           if [ "${{ github.event_name }}" = "push" ]; then
             VERSION="${BASE}-patch.$(git rev-parse --short HEAD)"
+            # Capture the commit message that triggered this build
+            COMMIT_MSG=$(git log -1 --format='%s' HEAD)
           else
             VERSION="$BASE"
+            COMMIT_MSG=""
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "commit_msg=$COMMIT_MSG" >> "$GITHUB_OUTPUT"
 
-      - name: Update config.yaml version
+      - name: Update config.yaml and changelog
         if: github.event_name == 'push'
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          COMMIT_MSG: ${{ steps.version.outputs.commit_msg }}
         run: |
           sed -i "s/^version:.*/version: ${VERSION}/" music_assistant_youtube/config.yaml
+
+          # Prepend new entry to CHANGELOG.md
+          CHANGELOG="music_assistant_youtube/CHANGELOG.md"
+          ENTRY="## ${VERSION}\n- ${COMMIT_MSG}"
+          if [ -f "$CHANGELOG" ]; then
+            printf '%b\n\n' "$ENTRY" | cat - "$CHANGELOG" > "$CHANGELOG.tmp"
+            mv "$CHANGELOG.tmp" "$CHANGELOG"
+          else
+            printf '%b\n' "$ENTRY" > "$CHANGELOG"
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add music_assistant_youtube/config.yaml
+          git add music_assistant_youtube/config.yaml music_assistant_youtube/CHANGELOG.md
           git commit -m "chore: bump version to ${VERSION}" || true
           git push || true
 
@@ -125,9 +147,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.prepare.outputs.version }}
           BASE_TAG: ${{ needs.prepare.outputs.base_tag }}
+          COMMIT_MSG: ${{ needs.prepare.outputs.commit_msg }}
         run: |
           gh release create "$VERSION" \
             --title "Music Assistant yt-dlp $VERSION" \
-            --notes "Music provider code change, rebuild based on upstream Music Assistant \`$BASE_TAG\`." \
+            --notes "${COMMIT_MSG}
+
+          Rebuild based on upstream Music Assistant \`$BASE_TAG\`." \
             --generate-notes \
             --latest

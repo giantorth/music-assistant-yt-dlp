@@ -66,15 +66,43 @@ jobs:
           # Update build.yaml base image tags
           sed -i "s|ghcr.io/music-assistant/server:[^ ]*|ghcr.io/music-assistant/server:${UPSTREAM_VERSION}|g" music_assistant_youtube/build.yaml
 
+      - name: Update changelog
+        env:
+          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
+          UPSTREAM_NOTES: ${{ needs.check-upstream.outputs.upstream_notes }}
+        run: |
+          CHANGELOG="music_assistant_youtube/CHANGELOG.md"
+          {
+            echo "## ${UPSTREAM_VERSION}"
+            echo "- Upstream Music Assistant server update to ${UPSTREAM_VERSION}"
+            echo ""
+            echo "### Upstream Release Notes"
+            echo "${UPSTREAM_NOTES}"
+            echo ""
+            if [ -f "$CHANGELOG" ]; then
+              cat "$CHANGELOG"
+            fi
+          } > "$CHANGELOG.tmp"
+          mv "$CHANGELOG.tmp" "$CHANGELOG"
+
       - name: Commit version bump
         env:
           UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .upstream-version music_assistant_youtube/config.yaml music_assistant_youtube/build.yaml
+          git add .upstream-version music_assistant_youtube/config.yaml music_assistant_youtube/build.yaml music_assistant_youtube/CHANGELOG.md
           git commit -m "chore: bump upstream MA to ${UPSTREAM_VERSION}"
           git push
+
+      - name: Trigger build workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
+        run: |
+          gh workflow run build.yaml \
+            --ref main \
+            -f upstream_version="$UPSTREAM_VERSION"
 
       - name: Create release
         env:
