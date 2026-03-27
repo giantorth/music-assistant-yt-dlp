@@ -1,5 +1,5 @@
 build_from:
-  amd64: ghcr.io/music-assistant/server:2.8.0
-  aarch64: ghcr.io/music-assistant/server:2.8.0
+  amd64: ghcr.io/music-assistant/server:2.8.1
+  aarch64: ghcr.io/music-assistant/server:2.8.1
 args:
-  BUILD_FROM: ghcr.io/music-assistant/server:2.8.0
+  BUILD_FROM: ghcr.io/music-assistant/server:2.8.1
