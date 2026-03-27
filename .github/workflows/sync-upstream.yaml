@@ -45,13 +45,12 @@ jobs:
             echo "Already up to date: $CURRENT_VERSION"
           fi
 
-  update-and-build:
+  update:
     needs: check-upstream
     if: needs.check-upstream.outputs.new_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -96,14 +95,24 @@ jobs:
           git commit -m "chore: bump upstream MA to ${UPSTREAM_VERSION}"
           git push
 
-      - name: Trigger build workflow
-        env:
-          GH_TOKEN: ${{ github.token }}
-          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
-        run: |
-          gh workflow run build.yaml \
-            --ref main \
-            -f upstream_version="$UPSTREAM_VERSION"
+  build:
+    needs: [check-upstream, update]
+    if: needs.check-upstream.outputs.new_release == 'true'
+    uses: ./.github/workflows/build.yaml
+    with:
+      upstream_version: ${{ needs.check-upstream.outputs.upstream_version }}
+    permissions:
+      contents: write
+      packages: write
+
+  release:
+    needs: [check-upstream, build]
+    if: needs.check-upstream.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Create release
         env:
