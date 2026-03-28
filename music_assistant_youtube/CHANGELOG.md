@@ -1,3 +1,6 @@
+## 2.8.1-patch.f02c3bf
+- Better playback, format selection, retry logic
+
 ## 2.8.1-patch.47be7c5
 - Upstream pipeline fix
 
