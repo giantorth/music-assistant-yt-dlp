@@ -4,6 +4,10 @@ A Home Assistant add-on that packages the [Music Assistant](https://music-assist
 
 ## Installation
 
+[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fgiantorth%2Fmusic-assistant-yt-dlp)
+
+Or manually:
+
 1. In Home Assistant, go to **Settings > Add-ons > Add-on Store**
 2. Click the three-dot menu (top right) and select **Repositories**
 3. Add this repository URL:
