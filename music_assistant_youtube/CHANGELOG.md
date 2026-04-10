@@ -1,3 +1,37 @@
+## 2.8.3
+- Upstream Music Assistant server update to 2.8.3
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.8.2](https://github.com/music-assistant/server/releases/tag/2.8.2)_
+
+### 🐛 Bugfixes
+
+- Rewrite tidal stream behaviour to avoid premature cutoff (by @jozefKruszynski in #3369)
+- YT Music: Fix syncing 'Episodes for later' in podcast library sync (by @teancom in #3582)
+- Fix flow stream playlog pre-count and use 50/50 crossfade split (by @marcelveldt in #3587)
+- Fix sync group player desynchronization and add dynamic leader switching (by @marcelveldt in #3591)
+- Revert "Rewrite tidal stream behaviour to avoid premature cutoff (#3369)" (by @jozefKruszynski in #3593)
+- Fix sync group regressions: proper locking and dynamic leader switch (by @marcelveldt in #3594)
+- Include missing description in automatic artist metadata scan (by @OzGav in #3595)
+- Add protocol awareness and transition guards to sync group player (by @marcelveldt in #3600)
+- Fix party duplicate prevention race (by @marcelveldt in #3601)
+- Subsonic: Fix structured lyrics yet again (by @khers in #3604)
+- Fix player/queue deadlock on multiple simultane (play) actions (by @marcelveldt in #3624)
+- Fix AirPlay late joiner out-of-sync when joining a sync group (by @marcelveldt in #3625)
+- Fix flow mode queue tracking drift on AirPlay dynamic leader switch (by @marcelveldt in #3628)
+
+### 🧰 Maintenance and dependency bumps
+
+- Consolidate smart fades analyzer thread calls to fix asyncio slow-task warning (by @marcelveldt in #3588)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@OzGav, @jozefKruszynski, @khers, @marcelveldt, @teancom
+
 ## 2.8.2
 - Upstream Music Assistant server update to 2.8.2
 
