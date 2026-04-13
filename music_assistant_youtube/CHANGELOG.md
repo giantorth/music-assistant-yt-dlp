@@ -1,3 +1,16 @@
+## 2.8.4
+- Upstream Music Assistant server update to 2.8.4
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.8.3](https://github.com/music-assistant/server/releases/tag/2.8.3)_
+
+### Other Changes
+
+- [Backport to stable] 2.8.4 (by @github-actions[bot] in #3634)
+
+
 ## 2.8.3
 - Upstream Music Assistant server update to 2.8.3
 
