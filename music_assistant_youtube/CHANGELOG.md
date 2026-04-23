@@ -1,3 +1,39 @@
+## 2.8.6
+- Upstream Music Assistant server update to 2.8.6
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.8.5](https://github.com/music-assistant/server/releases/tag/2.8.5)_
+
+### 🐛 Bugfixes
+
+- Fix ffmpeg process leak in smart fades mixer on aborted playback (by @marcelveldt in #3725)
+- Harden AirPlay STOP command delivery and add teardown logging (by @marcelveldt in #3729)
+- Prevent concurrent flow-stream producers from corrupting the playlog (by @marcelveldt in #3731)
+- Guard Sonos volume attribute update against uninitialized state (by @marcelveldt in #3732)
+- Fix ORF Radiothek browse reverting to top level (by @OzGav in #3733)
+- Preserve multi-value album type across all tag parsers (by @OzGav in #3743)
+- [Soundcloud]: improving search (by @fionn-r in #3745)
+- Fix enqueue action 'replace' stopping the music (by @MarvinSchenkel in #3753)
+- Qobuz: fix credential leak on 401 and populate date_added (by @OzGav in #3754)
+- Implement power control function for squeezelite (by @MarvinSchenkel in #3755)
+- Fix manual genres disappearing after a cleanup run (by @MarvinSchenkel in #3757)
+- Force imageproxy over streamserver for Airplay artwork (by @MarvinSchenkel in #3763)
+- Fix tidal recommendations (by @jozefKruszynski in #3767)
+- Change heartbeat of websocket and sendspin proxy socket to 25s (by @MarvinSchenkel in #3769)
+- Fix 30s delay after switching tracks on Sendspin (by @maximmaxim345 in #3777)
+
+### 🧰 Maintenance and dependency bumps
+
+- Bump auntie-sounds to 1.1.8 (by @kieranhogg in #3723)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @fionn-r, @jozefKruszynski, @kieranhogg, @marcelveldt, @maximmaxim345
+
 ## 2.8.5
 - Upstream Music Assistant server update to 2.8.5
 
