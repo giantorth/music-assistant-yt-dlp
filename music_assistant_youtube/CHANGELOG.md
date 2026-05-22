@@ -1,3 +1,37 @@
+## 2.8.8
+- Upstream Music Assistant server update to 2.8.8
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.8.7](https://github.com/music-assistant/server/releases/tag/2.8.7)_
+
+### 🚀 Features and enhancements
+
+- Support German radio station metadata (by @OzGav in #3881)
+
+### 🐛 Bugfixes
+
+- Fix protocol recovery with missing cached parent (by @prydie in #3829)
+- Fix output bit depth ignoring supported sample-rate/bit-depth pairs in player settings (by @OzGav in #3842)
+- Fix imageproxy URL encoding for paths containing only spaces (by @OzGav in #3863)
+- Tolerate non-UTF-8 metadata in DLNA SOAP/NOTIFY responses (by @OzGav in #3864)
+- Disable zone handling for a disabled player in MusicCast (by @fmunkes in #3872)
+- Fix media progress retrieval for open sessions in Audiobookshelf (by @fmunkes in #3879)
+- Fix Airplay not stopping stream on some devices. (by @MarvinSchenkel in #3903)
+- Squeezelite: Honor per-player output_codec in multi-client sync URL (by @MarvinSchenkel in #3924)
+- Sonos S1: Implement select_source for line-in support (by @MarvinSchenkel in #3925)
+- Streams: Handle empty supported_sample_rates in get_output_format (by @MarvinSchenkel in #3926)
+- Fix HEOS showing incorrect Now Playing (by @Tommatheussen in #3928)
+- Close coroutines when submitted in rapid succession (by @MarvinSchenkel in #3929)
+- Fix HEOS queue cleanup slowing down other commands (by @Tommatheussen in #3932)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @Tommatheussen, @fmunkes, @prydie
+
 ## 2.8.7
 - Upstream Music Assistant server update to 2.8.7
 
