@@ -1,3 +1,29 @@
+## 2.8.9
+- Upstream Music Assistant server update to 2.8.9
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.8.8](https://github.com/music-assistant/server/releases/tag/2.8.8)_
+
+### 🐛 Bugfixes
+
+- Resolve universal_player wrappers in UGP stream handler (by @OzGav in #3952)
+- Skip DSP-triggered playback restart when DSP was and remains disabled (by @MarvinSchenkel in #3988)
+- Fix Deezer playback stalling on tracks with insufficient rights (error 2002) (by @MarvinSchenkel in #4048)
+- Phishin fixes and optimisations (by @OzGav in #4066)
+- Fix Bluesound ungroup crashing on non-existent pyblu client attributes (by @OzGav in #4072)
+
+### 🧰 Maintenance and dependency bumps
+
+- Revert "Resolve universal_player wrappers in UGP stream handler" (by @OzGav in #3956)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav
+
 ## 2.8.8
 - Upstream Music Assistant server update to 2.8.8
 
