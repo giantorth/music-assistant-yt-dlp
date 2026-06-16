@@ -45,6 +45,26 @@ Paste your YouTube cookies to enable playback of age-restricted or member-only c
 
 Cookies may expire over time and need to be refreshed. Leave empty for public content only.
 
+### File Cache
+
+The provider can download and cache YouTube audio on disk for faster replay and more reliable seeking. Caching is **enabled by default**.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Enable file cache | On | Download VOD tracks to disk and reuse them on later plays |
+| Cache directory | `/media/music-assistant-youtube-cache` | Where cached files are stored |
+| Maximum cache size (MB) | `0` (unlimited) | When set, least-recently-used entries are removed when full |
+
+**Persistence:** The add-on container uses `tmpfs` for its root filesystem. Store the cache on a mapped writable path (for example under `/media`) so files survive restarts.
+
+**Behavior:**
+
+- Cache keys are YouTube video IDs (one best-quality audio file per video).
+- Live streams are never cached.
+- JSON sidecar metadata is stored next to each cached file.
+- If caching fails, playback falls back to the normal remote HTTP stream.
+- Use **Clear file cache** in the provider settings to delete all cached audio.
+
 ## Updating the YouTube Provider
 
 Edit the files in `music_assistant_youtube/youtube_provider/` and push to `main`. The build workflow will automatically rebuild and publish new container images.
