@@ -1,3 +1,33 @@
+## 2.9.3
+- Upstream Music Assistant server update to 2.9.3
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.9.2](https://github.com/music-assistant/server/releases/tag/2.9.2)_
+
+### 🐛 Bugfixes
+
+- Fix Tidal DASH playback stuttering by serving manifests as HTTP routes (by @libre-7 in #4062)
+- Pace audio analysis and cap it to half the CPU cores (by @marcelveldt in #4311)
+- Fix protocol player settings not reverting to their default value (by @marcelveldt in #4314)
+- Fix WebDAV sync failing on folder names with special characters (by @marcelveldt in #4315)
+- Fix podcast episode lookup and a queue preload crash on a drained queue (by @marcelveldt in #4318)
+- Preserve percent-encoding when fetching radio/HTTP stream URLs (by @OzGav in #4319)
+- Fix podcast episode lookup in gpodder (by @fmunkes in #4323)
+- Fix playback of multipart files with apostrophes in path (by @OzGav in #4329)
+- Raise open-file soft limit at startup (by @OzGav in #4332)
+- Fix Party URL when webserver URL has trailing / (by @OzGav in #4375)
+- Fix white noise bug in Jellyfin (by @OzGav in #4378)
+- Fix elapsed time drift for live sources played to a sync group (by @marcelveldt in #4385)
+- Plex: fix track sync re-scanning the whole library on every page (by @marcelveldt in #4386)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@OzGav, @fmunkes, @libre-7, @marcelveldt
+
 ## 2.9.2
 - Upstream Music Assistant server update to 2.9.2
 
