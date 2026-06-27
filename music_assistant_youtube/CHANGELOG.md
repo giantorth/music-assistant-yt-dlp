@@ -1,3 +1,6 @@
+## 2.9.4-patch.7bc6925
+- Merge pull request #3 from 76696265636f646572/yt-caching
+
 ## 2.9.4
 - Upstream Music Assistant server update to 2.9.4
 
