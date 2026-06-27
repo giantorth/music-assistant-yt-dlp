@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 from typing import Any
 from urllib.parse import quote_plus
 
@@ -312,6 +313,93 @@ def _extract_stream_or_live_once(
             return {**stream_format, "is_live": False}
 
         raise UnplayableMediaError(f"No audio stream found for {video_id}")
+
+
+def _format_selector_for_stream(stream_format: dict[str, Any]) -> str:
+    """Build a yt-dlp format selector for a previously selected stream format."""
+    format_id = stream_format.get("format_id")
+    if format_id:
+        return str(format_id)
+    return "m4a/bestaudio/best"
+
+
+def _resolve_downloaded_path(
+    info: dict[str, Any],
+    stream_format: dict[str, Any],
+    inprogress_dir: Path,
+) -> Path:
+    """Return the path yt-dlp wrote for a completed download."""
+    requested = info.get("requested_downloads") or []
+    if requested and requested[0].get("filepath"):
+        return Path(requested[0]["filepath"])
+    if info.get("filepath"):
+        return Path(info["filepath"])
+    ext = info.get("ext") or stream_format.get("ext") or "bin"
+    candidate = inprogress_dir / f"download.{ext}"
+    if candidate.is_file():
+        return candidate
+    matches = sorted(inprogress_dir.glob("download.*"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if matches:
+        return matches[0]
+    msg = "Download produced no file"
+    raise UnplayableMediaError(msg)
+
+
+def download_audio_to_path(
+    yt_dlp: Any,
+    ydl_opts: dict[str, Any],
+    video_id: str,
+    dest_stem: Path,
+    stream_format: dict[str, Any],
+) -> tuple[Path, dict[str, Any]]:
+    """Download VOD audio to disk, preserving the original container.
+
+    Downloads into an isolated in-progress folder, then the caller commits the
+    finished file into the cache. Prefer the already-extracted stream URL so the
+    cached bytes match the HTTP playback stream.
+
+    :param yt_dlp: The imported yt_dlp module.
+    :param ydl_opts: Base yt-dlp options dict.
+    :param video_id: YouTube video ID.
+    :param dest_stem: Unused path anchor; kept for API compatibility.
+    :param stream_format: Selected format dict from extract_stream_or_live.
+    :returns: Tuple of (downloaded file path, metadata dict for cache sidecar).
+    """
+    inprogress_dir = dest_stem.parent / "inprogress"
+    inprogress_dir.mkdir(parents=True, exist_ok=True)
+    outtmpl = str(inprogress_dir / "download.%(ext)s")
+    opts = {
+        **ydl_opts,
+        "outtmpl": outtmpl,
+        "skip_download": False,
+        "nopart": True,  # --no-part: write directly in the in-progress folder
+        "quiet": ydl_opts.get("quiet", True),
+    }
+    stream_url = stream_format.get("url")
+    watch_url = f"{YT_DOMAIN}/watch?v={video_id}"
+    try:
+        if stream_url:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(stream_url, download=True)
+        else:
+            opts_with_format = {**opts, "format": _format_selector_for_stream(stream_format)}
+            with yt_dlp.YoutubeDL(opts_with_format) as ydl:
+                info = ydl.extract_info(watch_url, download=True)
+    except yt_dlp.utils.DownloadError as err:
+        raise UnplayableMediaError(str(err)) from err
+    if not info:
+        raise UnplayableMediaError(f"Download failed for {video_id}")
+    downloaded = _resolve_downloaded_path(info, stream_format, inprogress_dir)
+    if not downloaded.is_file() or downloaded.stat().st_size == 0:
+        raise UnplayableMediaError(f"Download produced no file for {video_id}")
+    metadata = {
+        "format_id": info.get("format_id") or stream_format.get("format_id"),
+        "audio_ext": info.get("ext") or stream_format.get("ext"),
+        "audio_channels": info.get("audio_channels") or stream_format.get("audio_channels"),
+        "asr": info.get("asr") or stream_format.get("asr"),
+        "duration": info.get("duration") or stream_format.get("duration"),
+    }
+    return downloaded, metadata
 
 
 def _extract_hls_manifest(info: dict[str, Any], video_id: str) -> dict[str, Any]:

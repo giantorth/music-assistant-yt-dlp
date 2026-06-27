@@ -5,8 +5,16 @@ from music_assistant_models.enums import ProviderFeature
 CONF_API_KEY = "api_key"
 CONF_COOKIES = "cookies"
 CONF_PLAYLIST_LIMIT = "playlist_limit"
+CONF_CACHE_ENABLED = "cache_enabled"
+CONF_CACHE_DIR = "cache_dir"
+CONF_CACHE_MAX_SIZE_MB = "cache_max_size_mb"
+CONF_ACTION_CLEAR_CACHE = "clear_cache"
 
 DEFAULT_PLAYLIST_LIMIT = 25
+DEFAULT_CACHE_ENABLED = True
+DEFAULT_CACHE_DIR = "/media/music-assistant-youtube-cache"
+DEFAULT_CACHE_MAX_SIZE_MB = 0  # 0 = unlimited
+PREFETCH_AHEAD = 3
 
 YT_DATA_API_BASE = "https://www.googleapis.com/youtube/v3"
 

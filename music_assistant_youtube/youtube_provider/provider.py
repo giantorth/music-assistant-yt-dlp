@@ -6,13 +6,15 @@ import asyncio
 import contextlib
 import importlib
 import logging
+import shutil
 import time
 from io import StringIO
+from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from music_assistant_models.enums import ContentType, MediaType, StreamType
-from music_assistant_models.errors import MediaNotFoundError, SetupFailedError
+from music_assistant_models.errors import MediaNotFoundError, SetupFailedError, UnplayableMediaError
 from music_assistant_models.media_items import (
     Album,
     Artist,
@@ -30,13 +32,21 @@ from music_assistant.models.music_provider import MusicProvider
 
 from .constants import (
     CONF_API_KEY,
+    CONF_CACHE_DIR,
+    CONF_CACHE_ENABLED,
+    CONF_CACHE_MAX_SIZE_MB,
     CONF_COOKIES,
     CONF_PLAYLIST_LIMIT,
+    DEFAULT_CACHE_DIR,
+    DEFAULT_CACHE_ENABLED,
     DEFAULT_LIVE_STREAM_URL_EXPIRATION,
     DEFAULT_PLAYLIST_LIMIT,
     DEFAULT_STREAM_URL_EXPIRATION,
+    PREFETCH_AHEAD,
 )
+from .file_cache import CachedStreamInfo, FileCache
 from .helpers import (
+    download_audio_to_path,
     extract_channel_info,
     extract_channel_playlists,
     extract_channel_videos,
@@ -72,13 +82,23 @@ class YouTubeProvider(MusicProvider):
 
     _yt_dlp: Any = None
     _netscape_cookies: str | None = None
+    _file_cache: FileCache | None = None
 
     async def handle_async_init(self) -> None:
         """Set up the YouTube provider."""
         logging.getLogger("yt_dlp").setLevel(self.logger.level + 10)
         await self._install_packages()
+        self._prefetch_tasks: set[asyncio.Task[None]] = set()
         if raw_cookies := self.config.get_value(CONF_COOKIES):
             self._netscape_cookies = _to_netscape_cookies(str(raw_cookies))
+        self._file_cache = self._init_file_cache()
+        if self._file_cache:
+            try:
+                await asyncio.to_thread(self._file_cache.ensure_ready)
+                self.logger.info("YouTube file cache enabled at %s", self._file_cache.cache_dir)
+            except OSError as err:
+                self.logger.warning("File cache disabled: cannot use %s: %s", self._file_cache.cache_dir, err)
+                self._file_cache = None
         if self.config.get_value(CONF_API_KEY):
             self.logger.info("YouTube Data API key configured, using API for search/metadata")
         else:
@@ -236,13 +256,32 @@ class YouTubeProvider(MusicProvider):
         """Return stream details for the given track.
 
         Handles both regular videos (HTTP direct URL) and live streams (HLS)
-        in a single yt-dlp extraction.
+        in a single yt-dlp extraction. VOD tracks use the on-disk cache when enabled.
         """
+        if self._file_cache:
+            cached = await asyncio.to_thread(self._file_cache.get_hit, item_id)
+            if cached:
+                self._schedule_prefetch(item_id)
+                return self._build_cached_stream_details(item_id, cached)
+
         result = await asyncio.to_thread(
             extract_stream_or_live, self._yt_dlp, self._ydl_opts(), item_id
         )
         if result.get("is_live"):
             return self._build_live_stream_details(item_id, result)
+
+        if self._file_cache:
+            try:
+                cached = await self._download_and_cache(item_id, result)
+                self._schedule_prefetch(item_id)
+                return self._build_cached_stream_details(item_id, cached)
+            except Exception as err:
+                self.logger.warning(
+                    "File cache failed for %s, falling back to remote stream: %s",
+                    item_id,
+                    err,
+                )
+
         return self._build_vod_stream_details(item_id, result)
 
     def _build_vod_stream_details(
@@ -277,6 +316,164 @@ class YouTubeProvider(MusicProvider):
         if sample_rate := stream_format.get("asr"):
             stream_details.audio_format.sample_rate = int(sample_rate)
         return stream_details
+
+    def _init_file_cache(self) -> FileCache | None:
+        """Create a FileCache instance from provider config, or None if disabled."""
+        enabled = self.config.get_value(CONF_CACHE_ENABLED)
+        if enabled is None:
+            enabled = DEFAULT_CACHE_ENABLED
+        if not enabled:
+            return None
+        raw_dir = self.config.get_value(CONF_CACHE_DIR)
+        cache_dir = Path(str(raw_dir) if raw_dir else DEFAULT_CACHE_DIR)
+        raw_max = self.config.get_value(CONF_CACHE_MAX_SIZE_MB)
+        max_mb = int(str(raw_max)) if raw_max is not None else 0
+        max_bytes = max_mb * 1024 * 1024 if max_mb > 0 else None
+        return FileCache(cache_dir, max_size_bytes=max_bytes)
+
+    async def _download_and_cache(
+        self, item_id: str, stream_format: dict[str, Any]
+    ) -> CachedStreamInfo:
+        """Download audio to disk and commit to the file cache."""
+        assert self._file_cache is not None
+
+        def _download() -> CachedStreamInfo:
+            hit = self._file_cache.get_hit(item_id)
+            if hit:
+                return hit
+            if not self._file_cache.try_acquire_download_lock(item_id):
+                msg = f"Cache download already in progress for {item_id}"
+                raise UnplayableMediaError(msg)
+            entry_dir = self._file_cache.entry_dir(item_id)
+            temp_stem = self._file_cache.temp_download_stem(item_id)
+            try:
+                downloaded, metadata = download_audio_to_path(
+                    self._yt_dlp,
+                    self._ydl_opts(),
+                    item_id,
+                    temp_stem,
+                    stream_format,
+                )
+                final_path = self._file_cache.commit(item_id, downloaded, metadata)
+            except Exception:
+                shutil.rmtree(entry_dir / "inprogress", ignore_errors=True)
+                raise
+            finally:
+                self._file_cache.release_download_lock(item_id)
+            hit = self._file_cache.get_hit(item_id)
+            if hit:
+                return hit
+            return CachedStreamInfo(
+                video_id=item_id,
+                audio_path=final_path,
+                metadata=metadata,
+            )
+
+        return await asyncio.to_thread(_download)
+
+    def _build_cached_stream_details(
+        self, item_id: str, cached: CachedStreamInfo
+    ) -> StreamDetails:
+        """Build stream details for a locally cached VOD file."""
+        metadata = cached.metadata
+        audio_ext = metadata.get("audio_ext", "unknown")
+        file_path = str(cached.audio_path)
+        stream_details = StreamDetails(
+            provider=self.instance_id,
+            item_id=item_id,
+            audio_format=AudioFormat(
+                content_type=ContentType.try_parse(str(audio_ext)),
+            ),
+            stream_type=StreamType.LOCAL_FILE,
+            path=file_path,
+            data=file_path,
+            can_seek=True,
+            allow_seek=True,
+            expiration=86400 * 365,
+        )
+        if duration := metadata.get("duration"):
+            with contextlib.suppress(ValueError, TypeError):
+                stream_details.duration = int(float(duration))
+        if channels := metadata.get("audio_channels"):
+            if str(channels).isdigit():
+                stream_details.audio_format.channels = int(channels)
+        if sample_rate := metadata.get("asr"):
+            with contextlib.suppress(ValueError, TypeError):
+                stream_details.audio_format.sample_rate = int(sample_rate)
+        return stream_details
+
+    def _schedule_prefetch(self, current_item_id: str) -> None:
+        """Prefetch upcoming queue items in the background."""
+        if not self._file_cache:
+            return
+        task = asyncio.create_task(self._prefetch_upcoming(current_item_id))
+        self._prefetch_tasks.add(task)
+        task.add_done_callback(self._prefetch_tasks.discard)
+
+    def _video_id_for_instance(self, media_item: Any) -> str | None:
+        """Return YouTube video ID from a media item if it belongs to this provider."""
+        if not media_item:
+            return None
+        for mapping in getattr(media_item, "provider_mappings", None) or []:
+            if mapping.provider_instance == self.instance_id:
+                return str(mapping.item_id)
+        if getattr(media_item, "provider", None) == self.domain:
+            return str(getattr(media_item, "item_id", "")) or None
+        return None
+
+    def _is_queue_item_from_provider(self, queue_item: Any) -> bool:
+        """Return True if the queue item is served by this provider instance."""
+        media = getattr(queue_item, "media_item", None)
+        return self._video_id_for_instance(media) is not None
+
+    async def _prefetch_upcoming(self, current_item_id: str) -> None:
+        """Download cache for upcoming tracks from this provider in active queues."""
+        player_queues = getattr(self.mass, "player_queues", None)
+        if player_queues is None:
+            return
+        get_all = getattr(player_queues, "all", None)
+        if not callable(get_all):
+            return
+        try:
+            queues = await get_all()
+        except Exception:
+            return
+        video_ids: list[str] = []
+        for queue in queues:
+            queue_id = getattr(queue, "queue_id", None) or getattr(queue, "id", None)
+            if not queue_id:
+                continue
+            current = getattr(queue, "current_item", None)
+            if not current:
+                continue
+            if self._video_id_for_instance(getattr(current, "media_item", None)) != current_item_id:
+                continue
+            cur_index = getattr(queue, "current_index", None)
+            if cur_index is None:
+                continue
+            index: int | str = cur_index
+            for _ in range(PREFETCH_AHEAD):
+                next_item = player_queues.get_next_item(queue_id, index)
+                if not next_item:
+                    break
+                index = getattr(next_item, "index", index)
+                if not self._is_queue_item_from_provider(next_item):
+                    continue
+                vid = self._video_id_for_instance(getattr(next_item, "media_item", None))
+                if vid and vid not in video_ids:
+                    video_ids.append(vid)
+        for video_id in video_ids:
+            if await asyncio.to_thread(self._file_cache.get_hit, video_id):
+                continue
+            try:
+                result = await asyncio.to_thread(
+                    extract_stream_or_live, self._yt_dlp, self._ydl_opts(), video_id
+                )
+                if result.get("is_live"):
+                    continue
+                await self._download_and_cache(video_id, result)
+            except Exception as err:
+                self.logger.debug("Prefetch cache failed for %s: %s", video_id, err)
 
     def _build_live_stream_details(self, item_id: str, live_info: dict[str, Any]) -> StreamDetails:
         """Build stream details for a live YouTube stream.

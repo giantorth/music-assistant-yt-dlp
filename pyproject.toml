@@ -1,0 +1,12 @@
+[project]
+name = "music-assistant-yt-dlp"
+version = "0.0.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["music_assistant_youtube/youtube_provider"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
