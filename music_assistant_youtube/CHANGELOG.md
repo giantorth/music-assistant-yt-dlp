@@ -1,3 +1,36 @@
+## 2.9.6
+- Upstream Music Assistant server update to 2.9.6
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.9.5](https://github.com/music-assistant/server/releases/tag/2.9.5)_
+
+### 🐛 Bugfixes
+
+- Sync groups: keep slaved followers in group member dropdown after removal (by @MarvinSchenkel in #4036)
+- Improve global search reliability and database query parameter logic (by @SyedaAnshrahGillani in #4207)
+- Fix AirPlay receiver advertising on the wrong network interface (by @marcelveldt in #4543)
+- Remove Home Assistant musllinux wheel index from package install (by @MarvinSchenkel in #4549)
+- Pace background audio analysis to stop it saturating the CPU (by @oldrobotdev in #4568)
+- Fix builtin Snapserver failing to load on busy MA startup (by @OzGav in #4586)
+- Prevent Qobuz credentials leaking into logs on HTTP error responses (by @OzGav in #4587)
+- Snapcast fixes (by @OzGav in #4633)
+- Fix Plex artist albums not loading on servers without filter metadata (by @OzGav in #4657)
+- Don't auto-sync all Phish.in playlists to the library (by @OzGav in #4660)
+- Fix Spotify authentication failing after recent token changes (by @marcelveldt in #4692)
+
+### Other Changes
+
+- Allow the Home Assistant system user to filter listings by user and remove players (by @marcelveldt in #4641)
+- Add downloadable diagnostics report (backport) (by @marcelveldt in #4699)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @SyedaAnshrahGillani, @marcelveldt, @oldrobotdev
+
 ## 2.9.5
 - Upstream Music Assistant server update to 2.9.5
 
