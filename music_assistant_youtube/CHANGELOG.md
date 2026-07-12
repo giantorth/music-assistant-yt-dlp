@@ -1,3 +1,9 @@
+## 2.9.8
+- Upstream Music Assistant server update to 2.9.8
+
+### Upstream Release Notes
+* Bumped the base image to fix the Spotify Connect plugin
+
 ## 2.9.7
 - Upstream Music Assistant server update to 2.9.7
 
