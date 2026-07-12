@@ -1,3 +1,26 @@
+## 2.9.7
+- Upstream Music Assistant server update to 2.9.7
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.9.6](https://github.com/music-assistant/server/releases/tag/2.9.6)_
+
+### Other Changes
+
+- Remove HTTP diagnostics download endpoint (by @marcelveldt in #4710)
+
+### 🧰 Maintenance and dependency bumps
+
+- ⬆️ Update music-assistant-frontend to 2.17.186.post2 (by @music-assistant-machine in #4739)
+- ⬆️ Update music-assistant-frontend to 2.17.186.post3 (by @music-assistant-machine in #4752)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@marcelveldt
+
 ## 2.9.6
 - Upstream Music Assistant server update to 2.9.6
 
