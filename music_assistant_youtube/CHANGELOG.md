@@ -1,3 +1,29 @@
+## 2.9.12
+- Upstream Music Assistant server update to 2.9.12
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.9.11](https://github.com/music-assistant/server/releases/tag/2.9.11)_
+
+### 🐛 Bugfixes
+
+- Fix Sonos S1 speakers no longer reacting instantly after a network hiccup (by @marcelveldt in #5432)
+- Keep the full duration of an audiobook when resuming mid-book (by @marcelveldt in #5524)
+- Fix YouTube Music episode description breaking player state (by @andrei-marinache in #5560)
+- Fix Spotify playback (by @marcelveldt in #5568)
+- Fix Spotify playback (by @marcelveldt in #5574)
+
+### Other Changes
+
+- Keep the full duration of an audiobook when resuming mid-book (by @marcelveldt in #5534)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@andrei-marinache, @marcelveldt
+
 ## 2.9.11
 - Upstream Music Assistant server update to 2.9.11
 
