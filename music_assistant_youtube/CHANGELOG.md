@@ -1,3 +1,21 @@
+## 2.9.13
+- Upstream Music Assistant server update to 2.9.13
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.9.12](https://github.com/music-assistant/server/releases/tag/2.9.12)_
+
+### 🐛 Bugfixes
+
+- Fix Spotify playback authorization (by @marcelveldt in #5601)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@marcelveldt
+
 ## 2.9.12
 - Upstream Music Assistant server update to 2.9.12
 
