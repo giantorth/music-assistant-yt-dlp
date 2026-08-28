@@ -27,6 +27,7 @@ from music_assistant_models.streamdetails import StreamDetails, StreamMetadata
 
 from music_assistant.constants import VERBOSE_LOG_LEVEL
 from music_assistant.controllers.cache import use_cache
+from music_assistant.helpers.process import check_output
 from music_assistant.helpers.util import install_package
 from music_assistant.models.music_provider import MusicProvider
 
@@ -107,15 +108,36 @@ class YouTubeProvider(MusicProvider):
     async def _install_packages(self) -> None:
         """Install/update yt-dlp dynamically on every load.
 
-        Google breaks yt-dlp compatibility frequently; installing without a
-        pinned version on each startup keeps the provider working without
-        requiring a Music Assistant release.
+        Google breaks yt-dlp compatibility frequently; upgrading on each startup
+        keeps the provider working without requiring a Music Assistant release.
+
+        `install_package()` runs `uv pip install` without `--upgrade`, so an
+        already-installed yt-dlp satisfies the requirement and is never
+        refreshed. Call uv directly so the version actually moves forward, and
+        fall back to `install_package()` when that is unavailable.
         """
-        await install_package("yt-dlp[default]")
+        if not await self._upgrade_yt_dlp():
+            await install_package("yt-dlp[default]")
         try:
             self._yt_dlp = await asyncio.to_thread(importlib.import_module, "yt_dlp")
         except ImportError as err:
             raise SetupFailedError("Package yt_dlp failed to install") from err
+        version = getattr(getattr(self._yt_dlp, "version", None), "__version__", "unknown")
+        self.logger.info("Using yt-dlp %s", version)
+
+    async def _upgrade_yt_dlp(self) -> bool:
+        """Upgrade yt-dlp in place, returning True when the upgrade succeeded."""
+        try:
+            return_code, output = await check_output(
+                "uv", "pip", "install", "--no-cache", "--upgrade", "yt-dlp[default]"
+            )
+        except Exception as err:  # noqa: BLE001 - never block setup on the upgrade path
+            self.logger.warning("Could not upgrade yt-dlp: %s", err)
+            return False
+        if return_code != 0:
+            self.logger.warning("Could not upgrade yt-dlp: %s", output.decode())
+            return False
+        return True
 
     @property
     def is_streaming_provider(self) -> bool:
