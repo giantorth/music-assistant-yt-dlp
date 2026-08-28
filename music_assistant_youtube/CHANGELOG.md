@@ -1,3 +1,6 @@
+## 2.10.0-patch.e67b46f
+- Merge pull request #4 from urs-eller/fix/yt-dlp-upgrade-on-load
+
 ## 2.10.0
 - Upstream Music Assistant server update to 2.10.0
 
