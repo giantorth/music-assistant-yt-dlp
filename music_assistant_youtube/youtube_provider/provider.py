@@ -107,7 +107,7 @@ class YouTubeProvider(MusicProvider):
             ),
             ConfigEntry(
                 key=CONF_COOKIES,
-                type=ConfigEntryType.STRING,
+                type=ConfigEntryType.SECURE_STRING,
                 required=False,
                 advanced=True,
                 label="YouTube Cookies",
