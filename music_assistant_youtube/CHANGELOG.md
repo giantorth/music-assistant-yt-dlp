@@ -1,3 +1,64 @@
+## 2.10.3
+- Upstream Music Assistant server update to 2.10.3
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.10.2](https://github.com/music-assistant/server/releases/tag/2.10.2)_
+
+### 🚀 Features and enhancements
+
+- Align party and music quiz plugin icons with the frontend menu (by @MarvinSchenkel in #6258)
+- Default the global autoplay setting to off (by @MarvinSchenkel in #6276)
+
+### 🐛 Bugfixes
+
+- Play the newest episode when you ask for the latest one (by @OzGav in #6178)
+- Show ARD Audiothek episodes in the right order (by @OzGav in #6179)
+- Deezer: keep cover art and artist on user-uploaded tracks (by @jdaberkow in #6202)
+- Play a plain URL instead of a random track for users with a provider filter (by @MarvinSchenkel in #6205)
+- Fix sidebar shortcuts stuck after a provider was removed (by @OzGav in #6207)
+- Fix Deezer account isolation and clarify authentication failures (by @jdaberkow in #6213)
+- Fix Plex Connect starting the wrong track in large queues (by @MarvinSchenkel in #6217)
+- Fix Sonic Similarity not loading when the database holds a corrupt analysis row (by @MarvinSchenkel in #6218)
+- Sort Apple Music library by the date you actually added items (by @MarvinSchenkel in #6219)
+- Fix players not regrouping after an announcement on a synced player (by @MarvinSchenkel in #6220)
+- Route generic LinkPlay OEM devices to the generic WiiM backend (by @OzGav in #6223)
+- Plex provider - incorrectly accepts empty media container as lyrics (by @caraar12345 in #6229)
+- Keep local playlist covers in subfolders instead of replacing them with a collage (by @OzGav in #6230)
+- Stop TuneIn sync treating non-favourite stations as failed items (by @OzGav in #6231)
+- Keep Sonos S1 playback events from blocking the event loop (by @OzGav in #6235)
+- Skip corrupt audio files instead of crashing the play request (by @OzGav in #6242)
+- Tidal: fix playback of tracks that have a Dolby Atmos version (by @jozefKruszynski in #6244)
+- Fix Jellyfin 12 playback and artwork (by @MarvinSchenkel in #6251)
+- Fix a single-track Endless Mix looping over the same few songs (by @MarvinSchenkel in #6254)
+- Show the station logo instead of the previous track's artwork when a radio starts (by @OzGav in #6256)
+- Fix preset slot assignment and xml encoding in Bose Soundtouch (by @fmunkes in #6260)
+- Fix the Profiler plugin leaking memory during CPU profiling (by @marcelveldt in #6266)
+- Keep the MilkDrop visualizer alive on tracks longer than the audio buffer (by @jozefKruszynski in #6272)
+- Stop Sonos speakers cutting out a couple of tracks in (by @marcelveldt in #6278)
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>7 changes</summary>
+
+- Rename the DI provider to Digitally Imported (by @OzGav in #6197)
+- Use the coloured Sendspin logo for the provider icon (by @MarvinSchenkel in #6225)
+- Pace a stream by what is being served (by @marcelveldt in #6237)
+- BBC Sounds: remove duplicated function (by @kieranhogg in #6245)
+- Say so when a Sonos speaker cannot play a track (by @marcelveldt in #6246)
+- Keep Sonos playing an album of short tracks (by @marcelveldt in #6247)
+- Enabling debug logging no longer slows the server down (by @marcelveldt in #6265)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @caraar12345, @fmunkes, @jdaberkow, @jozefKruszynski, @kieranhogg, @marcelveldt
+
 ## 2.10.2
 - Upstream Music Assistant server update to 2.10.2
 
