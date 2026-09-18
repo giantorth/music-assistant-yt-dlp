@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from music_assistant_models.enums import ContentType, MediaType, StreamType
+from music_assistant_models.config_entries import ConfigEntry
+from music_assistant_models.enums import ContentType, MediaType, StreamType, ConfigEntryType
 from music_assistant_models.errors import MediaNotFoundError, SetupFailedError, UnplayableMediaError
 from music_assistant_models.media_items import (
     Album,
@@ -84,6 +85,62 @@ class YouTubeProvider(MusicProvider):
     _yt_dlp: Any = None
     _netscape_cookies: str | None = None
     _file_cache: FileCache | None = None
+
+    async def get_config_entries(self) -> tuple[ConfigEntry, ...]:
+        """Return configuration entries for the YouTube provider."""
+        return (
+            ConfigEntry(
+                key=CONF_API_KEY,
+                type=ConfigEntryType.SECURE_STRING,
+                required=False,
+                label="YouTube Data API v3 Key",
+                description="YouTube Data API key for search and metadata. If not provided, yt-dlp is used instead."
+            ),
+            ConfigEntry(
+                key=CONF_PLAYLIST_LIMIT,
+                type=ConfigEntryType.INTEGER,
+                default_value=DEFAULT_PLAYLIST_LIMIT,
+                range=(1, 100),
+                required=False,
+                label="Playlist Limit",
+                description="Controls the maximum number of channel playlists returned as albums per artist. Defaults to 25. Can be set between 1 and 100.",
+            ),
+            ConfigEntry(
+                key=CONF_COOKIES,
+                type=ConfigEntryType.SECURE_STRING,
+                required=False,
+                advanced=True,
+                label="YouTube Cookies",
+                description="YouTube cookies to enable playback of age-restricted or member-only content. Can be in Netscape cookies.txt format or a raw cookie header string (e.g. 'name1=val1; name2=val2').",
+            ),
+            ConfigEntry(
+                key=CONF_CACHE_ENABLED,
+                type=ConfigEntryType.BOOLEAN,
+                default_value=DEFAULT_CACHE_ENABLED,
+                required=False,
+                label="Enable File Cache",
+                description="Whether to enable file caching for downloaded content.",
+                advanced=True,
+            ),
+            ConfigEntry(
+                key=CONF_CACHE_DIR,
+                type=ConfigEntryType.STRING,
+                default_value=DEFAULT_CACHE_DIR,
+                required=False,
+                advanced=True,
+                label="Cache Directory",
+                description="Directory to store cached files. Defaults to '/media/music-assistant-youtube-cache' in the Music Assistant data directory.",
+            ),
+            ConfigEntry(
+                key=CONF_CACHE_MAX_SIZE_MB,
+                type=ConfigEntryType.INTEGER,
+                default_value=0,
+                required=False,
+                advanced=True,
+                label="Cache Max Size (MB)",
+                description="Maximum size of the cache in megabytes. 0 means no limit.",
+            ),
+        )
 
     async def handle_async_init(self) -> None:
         """Set up the YouTube provider."""
