@@ -1,3 +1,6 @@
+## 2.10.4-patch.e030ffa
+- Merge pull request #7 from darkzoul5/feat/provider-config-entries
+
 ## 2.10.4
 - Upstream Music Assistant server update to 2.10.4
 
