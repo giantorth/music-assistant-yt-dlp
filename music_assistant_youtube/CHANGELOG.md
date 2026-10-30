@@ -1,3 +1,50 @@
+## 2.10.9
+- Upstream Music Assistant server update to 2.10.9
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.10.8](https://github.com/music-assistant/server/releases/tag/2.10.8)_
+
+### 🚀 Features and enhancements
+
+- Auto pair Sendspin clients through Home Assistant (by @arturpragacz in #7181)
+
+### 🐛 Bugfixes
+
+- Don't fail HEOS setup when one device's inputs can't be browsed (by @OzGav in #7114)
+- Keep a track's length after its queue moves to another player (by @Simanias in #7136)
+- Keep a Universal Player's id when a stale native player claims its protocol (by @MarvinSchenkel in #7156)
+- Stop pushing metadata to legacy AirPlay receivers that advertise none (by @OzGav in #7168)
+- Report no song position for a stream that gives its song's duration but no position (by @culmat in #7187)
+- Show the station image when a Live365 station has no track cover (by @OzGav in #7188)
+- Chromecast: offer a cast app the controls it can take (by @Simanias in #7196)
+- Skip sonic analysis for audiobooks, podcasts and radio (by @OzGav in #7199)
+- Fix Qobuz performer names, paging and artists known only by name (by @OzGav in #7211)
+- Fix adding library audiobooks to builtin playlists (by @fmunkes in #7241)
+- Fix Spotify on Soloist stopping the queue at the end of every track (by @MarvinSchenkel in #7244)
+- Pick the Cast HTTP profile default per receiver model (by @MarvinSchenkel in #7245)
+- Fix disconnected players showing as available and playing (by @MarvinSchenkel in #7249)
+- Fix Snapcast queue not advancing to the next track (by @MarvinSchenkel in #7250)
+- Fix Snapcast skipping music during an announcement (by @MarvinSchenkel in #7252)
+- Fix Snapcast cutting off the end of short announcements (by @MarvinSchenkel in #7253)
+- Fix Snapcast playing old audio when replaying after a stop (by @MarvinSchenkel in #7254)
+- Fix a restarted Squeezelite group member staying silent (by @MarvinSchenkel in #7264)
+- Stop showing a disconnected player's queue as playing (by @MarvinSchenkel in #7265)
+- Fix WiiM position not updating for up to 30 s after playback starts (by @MarvinSchenkel in #7266)
+- Fix Snapcast playing the old track for seconds after next (by @MarvinSchenkel in #7269)
+- Fix Snapcast elapsed time after a native announcement (by @MarvinSchenkel in #7275)
+- Fix Squeezelite group skipping the playing track after an announcement on a member (by @MarvinSchenkel in #7276)
+- Fix resume restarting the track after a longer pause on players without native pause (by @MarvinSchenkel in #7277)
+- Fix squeezelite position jumping ahead after resume or seek (by @MarvinSchenkel in #7280)
+- Stop the Snapcast queue when its player goes unavailable (by @MarvinSchenkel in #7284)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @Simanias, @arturpragacz, @culmat, @fmunkes
+
 ## 2.10.8
 - Upstream Music Assistant server update to 2.10.8
 
