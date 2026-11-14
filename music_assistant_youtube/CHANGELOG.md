@@ -1,3 +1,45 @@
+## 2.10.12
+- Upstream Music Assistant server update to 2.10.12
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+**Why this extra release?** Music Assistant was sending more requests to music services than needed, which made playback slow or unreliable, with Spotify in particular. This release brings those requests back down. It also fixes several AirPlay problems: pairing on OS 27.2 and silent HomePod mini 2 and Shairport Sync speakers. Updating is recommended for everyone who uses Spotify or AirPlay.
+
+_Changes since [2.10.11](https://github.com/music-assistant/server/releases/tag/2.10.11)_
+
+### 🐛 Bugfixes
+
+- Reject control characters in concat file lists (by @chrisuthe in #7412)
+- Strip control characters from AirPlay now-playing metadata (by @chrisuthe in #7413)
+- Fix AirPlay group members drifting apart after a corrected cold start (by @cTopher in #7503)
+- Bound ffprobe/ffmpeg tag probes with a timeout (by @OzGav in #7584)
+- Keep playback within the request limits of music services (by @marcelveldt in #7599)
+- Give up on a play request that takes longer than a minute (by @marcelveldt in #7601)
+- Stop artists from fetching their whole catalogue when played or opened (by @marcelveldt in #7602)
+- Fix silent HomePod mini 2 and failing AirPlay group starts (airplay-cli v0.5.10) (by @musicassistant-bot[bot] in #7615)
+- Fix AirPlay pairing with Apple TV and HomeView on OS 27.2 (by @marcelveldt in #7632)
+- Fix AirPlay pairing on OS 27.2 and show HomePod controls in the Home app (airplay-cli v0.5.11) (by @musicassistant-bot[bot] in #7633)
+- Fix silent AirPlay 2 playback on Shairport Sync receivers (by @marcelveldt in #7662)
+- Fix silent Shairport Sync speakers after the first AirPlay 2 stream (airplay-cli v0.5.12) (by @musicassistant-bot[bot] in #7668)
+
+### 🎨 Frontend Changes
+
+- Show an artist's top tracks on the party guest page when the service lists no artist tracks (by @marcelveldt in [#3168](https://github.com/music-assistant/frontend/pull/3168))
+
+### 🧰 Maintenance and dependency bumps
+
+- Stop playback from requesting music services that asked us to wait (by @marcelveldt in #7600)
+- Stop a whole library folder from being played in one go (by @marcelveldt in #7604)
+- Fix music files failing to import while the server is busy (by @marcelveldt in #7660)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@OzGav, @cTopher, @chrisuthe, @marcelveldt
+
+
 ## 2.10.11
 - Upstream Music Assistant server update to 2.10.11
 
