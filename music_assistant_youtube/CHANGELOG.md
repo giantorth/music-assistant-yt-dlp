@@ -1,3 +1,64 @@
+## 2.10.13
+- Upstream Music Assistant server update to 2.10.13
+
+### Upstream Release Notes
+## 📦 Stable Release
+
+_Changes since [2.10.12](https://github.com/music-assistant/server/releases/tag/2.10.12)_
+
+### 🚀 Features and enhancements
+
+- Explain in the log why the Sendspin Cast bridge is skipped for unsupported devices (by @MarvinSchenkel in #7775)
+
+### 🐛 Bugfixes
+
+- Fix AirPlay 1 speakers staying silent after a live input restarts (by @devon3000 in #6819)
+- Keep album artwork on AirPlay when the next track shares the cover (by @MarvinSchenkel in #6912)
+- Close the first-time setup 15 minutes after the server starts (by @chrisuthe in #7410)
+- Fix ARD Sounds account login and sync subscriptions and progress (by @meiser79 in #7645)
+- Fix removing several players from a Squeezelite group at once (by @marcelveldt in #7666)
+- Keep the album cover on an Apple TV across tracks of the same album (airplay-cli v0.5.14) (by @musicassistant-bot[bot] in #7699)
+- Reset repeat mode when entering dynamic mode (by @willowkap in #7754)
+- Harden return URL validation and handle IdP errors at the auth callback (by @apophisnow in #7759)
+- Accept ReplayGain gain tags without a space before dB (by @OzGav in #7767)
+- Play gPodder and iTunes Podcasts episodes whose guid and stream url contain a space (by @fmunkes in #7768)
+- Start fully played podcast episodes and audiobooks from the beginning (by @MarvinSchenkel in #7772)
+- Fix tracks greyed out in a saved playlist when users share a provider type (by @MarvinSchenkel in #7774)
+- Fix hi-res playback failing on gen 1 HEOS speakers (by @MarvinSchenkel in #7776)
+- Delete only playlist art inside the provider's images folder (by @MarvinSchenkel in #7781)
+- Fix Snapcast restoring a missing 'default' stream after an announcement (by @MarvinSchenkel in #7784)
+- Fix sign-in being blocked by Cloudflare for Tailscale and CGNAT addresses (by @MarvinSchenkel in #7791)
+- Don't quit Cast sessions that Music Assistant didn't start (by @benjamin-m-holden in #7811)
+- Fix Smart Fades not recovering when its model download fails (by @OzGav in #7823)
+- Ask to save the SSL certificate and key before Verify (by @MarvinSchenkel in #7832)
+- Keep a muted WiiM speaker muted when its volume changes (by @MarvinSchenkel in #7834)
+- Keep DLNA players available after a failed event subscription renewal (by @MarvinSchenkel in #7846)
+- Fix the album cover on an Apple TV, Shairport Sync pause and seek, and HomePod group drift (airplay-cli v0.5.15) (by @musicassistant-bot[bot] in #7850)
+- Hide provider tokens in the failed image fetch warning (by @MarvinSchenkel in #7855)
+- Restart playback where it was when a speaker loses its stream connection (by @marcelveldt in #7878)
+- Keep the queue on the new track after Next while the player still reports the old stream (by @MarvinSchenkel in #7955)
+- Keep the duplicate album check from freezing a library with many same-title albums (by @MarvinSchenkel in #7956)
+- Show a connection error instead of "no libraries" when Plex setup cannot reach the server (by @MarvinSchenkel in #7957)
+
+### 🎨 Frontend Changes
+
+- Fix the volume slider ignoring the mouse on touchscreen PCs (by @MarvinSchenkel in [#3242](https://github.com/music-assistant/frontend/pull/3242))
+
+### Other Changes
+
+- Use MP3 by default for most Google Cast speakers to prevent dropouts (by @marcelveldt in #8014)
+- Show at most 100 releases of an artist on a music service (by @marcelveldt in #8018)
+
+### 🧰 Maintenance and dependency bumps
+
+- Stop repeated AirPlay Docker address warnings in the log (by @OzGav in #7829)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @apophisnow, @benjamin-m-holden, @chrisuthe, @devon3000, @fmunkes, @marcelveldt, @meiser79, @willowkap
+
 ## 2.10.12
 - Upstream Music Assistant server update to 2.10.12
 
